@@ -15,6 +15,12 @@ from a single command. 🚀
 
 ---
 
+## 👨‍💻 About
+
+This project is 🇦🇿 **made in Azerbaijan**, developed by **Elay Mammadli** ([@Vorlixx](https://github.com/Vorlixx)).
+
+---
+
 ## ✨ Features
 
 | Phase | Capability |
