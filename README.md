@@ -1,41 +1,41 @@
-# Subdomain & Attack Surface Recon Tool
+# 🕸️ Subdomain & Attack Surface Recon Tool
 
 A modular, high-performance reconnaissance toolkit written in Python that
 discovers subdomains, identifies live hosts, scans common service ports,
 fingerprints web technologies and generates professional reports — all
-from a single command.
+from a single command. 🚀
 
 ![Python](https://img.shields.io/badge/Python-3.9%2B-3776AB?logo=python&logoColor=white)
 ![License](https://img.shields.io/badge/License-MIT-blue)
 ![CLI](https://img.shields.io/badge/CLI-argparse-brightgreen)
 ![Async](https://img.shields.io/badge/Async-httpx%20%2B%20asyncio-important)
 
-> **Legal notice:** Use this tool only against systems you own or are
+> ⚖️ **Legal notice:** Use this tool only against systems you own or are
 > explicitly authorized to test. Unauthorized scanning may be illegal.
 
 ---
 
-## Features
+## ✨ Features
 
 | Phase | Capability |
 |-------|------------|
-| 1. Enumeration | Passive discovery via **crt.sh** certificate transparency logs + active **DNS brute-force** with wildcard-record detection |
-| 2. Live check | Concurrent **HTTPS/HTTP probing** (HTTPS first, automatic HTTP fallback) with status, title, redirect chain and headers capture |
-| 3. Port scan | Fast **TCP connect-based scanner** across 34 common service ports (customizable with `-p`) |
-| 4. Fingerprinting | **Technology detection** (20 header rules + 40 body rules) and **banner grabbing** for non-HTTP services (SSH, FTP, SMTP, MySQL, Redis, ...) |
-| 5. Reporting | Machine-readable **JSON** + self-contained **HTML dashboard** (dark theme, stat cards, live filtering) + colorful **Rich CLI** output |
+| 1️⃣ Enumeration | Passive discovery via **crt.sh** certificate transparency logs + active **DNS brute-force** with wildcard-record detection |
+| 2️⃣ Live check | Concurrent **HTTPS/HTTP probing** (HTTPS first, automatic HTTP fallback) with status, title, redirect chain and headers capture |
+| 3️⃣ Port scan | Fast **TCP connect-based scanner** across 34 common service ports (customizable with `-p`) |
+| 4️⃣ Fingerprinting | **Technology detection** (20 header rules + 40 body rules) and **banner grabbing** for non-HTTP services (SSH, FTP, SMTP, MySQL, Redis, ...) |
+| 5️⃣ Reporting | Machine-readable **JSON** + self-contained **HTML dashboard** (dark theme, stat cards, live filtering) + colorful **Rich CLI** output |
 
 Additional highlights:
 
-- **High throughput**: `asyncio` for HTTP probing, `ThreadPoolExecutor` for DNS brute-force, port scanning and banner grabbing.
-- **Robust error handling**: per-operation timeouts, connection errors, SSL/TLS failures and DNS edge cases (NXDOMAIN, NoAnswer, NoNameservers, lifetime timeouts) never crash the scan.
-- **Bounded resources**: body samples capped at 200 KB, crt.sh results capped at 500 entries, configurable concurrency everywhere.
-- **Wildcard protection**: a random-token probe detects catch-all DNS records so phantom subdomains are filtered out.
-- **Portable output**: the HTML report is fully self-contained — no CDN assets, no internet connection required to view it.
+- ⚡ **High throughput**: `asyncio` for HTTP probing, `ThreadPoolExecutor` for DNS brute-force, port scanning and banner grabbing.
+- 🛡️ **Robust error handling**: per-operation timeouts, connection errors, SSL/TLS failures and DNS edge cases (NXDOMAIN, NoAnswer, NoNameservers, lifetime timeouts) never crash the scan.
+- 📦 **Bounded resources**: body samples capped at 200 KB, crt.sh results capped at 500 entries, configurable concurrency everywhere.
+- 🃏 **Wildcard protection**: a random-token probe detects catch-all DNS records so phantom subdomains are filtered out.
+- 💾 **Portable output**: the HTML report is fully self-contained — no CDN assets, no internet connection required to view it.
 
 ---
 
-## Project structure
+## 📂 Project structure
 
 ```
 subdomain-recon-tool/
@@ -53,35 +53,38 @@ subdomain-recon-tool/
 └── recon_output/                # generated reports (JSON + HTML) — created at runtime
 ```
 
-### Design notes
+### 🧠 Design notes
 
 - **One object per host**: every enrichment step writes into a single
   `Subdomain` dataclass, keeping the modules decoupled and the report
   consistent.
 - **Modularity**: each module can be imported and used standalone from
-  your own scripts (see [Library usage](#library-usage)).
+  your own scripts (see [Library usage](#-library-usage)).
 - **Type-safe**: full type hints + docstrings throughout; Python 3.9+.
 
 ---
 
-## Installation
+## ⚙️ Installation
 
 Requires **Python 3.9+** (tested on 3.13).
 
 ```bash
 git clone https://github.com/<your-user>/subdomain-recon-tool.git
 cd subdomain-recon-tool
-
 python -m venv .venv
+
 # Windows
 .venv\Scripts\activate
+
 # Linux / macOS
 source .venv/bin/activate
 
 pip install -r requirements.txt
 ```
 
-## Usage
+---
+
+## 🚀 Usage
 
 ```bash
 python main.py -d example.com
@@ -105,7 +108,7 @@ Full control example — custom ports, tighter timeouts, more HTTP concurrency:
 python main.py -d example.com -p 80 443 8080 8443 22 --timeout 5 --http-concurrency 50 --threads 100 -v
 ```
 
-### Command line options
+### 🎛️ Command line options
 
 | Option | Description | Default |
 |--------|-------------|---------|
@@ -125,17 +128,17 @@ python main.py -d example.com -p 80 443 8080 8443 22 --timeout 5 --http-concurre
 | `-v, --verbose` | Verbose / debug logging | off |
 | `--version` | Show version and exit | — |
 
-### Output files
+### 📁 Output files
 
 After a scan the output directory contains:
 
-- **`report.json`** — full machine-readable results (schema below).
-- **`report.html`** — self-contained dashboard: stat cards (subdomains,
+- 📄 **`report.json`** — full machine-readable results (schema below).
+- 🖥️ **`report.html`** — self-contained dashboard: stat cards (subdomains,
   alive hosts, unique IPs, open ports, technologies), an alive/dead
   distribution bar, and a filterable table (search box + alive/source
   dropdowns). Open it in any browser, no server required.
 
-### JSON report schema
+### 🧾 JSON report schema
 
 ```json
 {
@@ -174,27 +177,31 @@ After a scan the output directory contains:
 }
 ```
 
-## How it works
+---
 
-1. **Enumeration** -- crt.sh is queried for certificates matching
+## 🔍 How it works
+
+1. **Enumeration** — crt.sh is queried for certificates matching
    `%.<domain>`; names are de-duplicated and wildcard prefixes stripped.
    In parallel, each wordlist label is resolved against your chosen DNS
    server. A random-label probe first detects wildcard DNS so catch-all
    records do not flood the results.
-2. **Live checking** -- every resolved host is requested over HTTPS first;
+2. **Live checking** — every resolved host is requested over HTTPS first;
    on timeout/TLS/connection failure it falls back to HTTP. The final URL,
    status code, `<title>`, headers and a 200 KB body sample are captured.
-3. **Port scanning** -- unique IPs are scanned with a connect-based scanner
+3. **Port scanning** — unique IPs are scanned with a connect-based scanner
    (34 default ports, parallel workers, per-port timeout). Open ports are
    mapped back to every subdomain sharing that IP.
-4. **Fingerprinting** -- response headers and body are matched against
+4. **Fingerprinting** — response headers and body are matched against
    curated regex rules (Nginx, Apache, WordPress, React, Vue, Laravel,
    Cloudflare, ...). Open non-HTTP ports are probed for service banners
    (SSH, FTP, SMTP, MySQL, Redis, ...).
-5. **Reporting** -- everything is aggregated into `Subdomain` objects and
+5. **Reporting** — everything is aggregated into `Subdomain` objects and
    written out as JSON + HTML; the CLI prints a summary table and stats.
 
-## Library usage
+---
+
+## 🧑‍💻 Library usage
 
 Every module is importable on its own:
 
@@ -207,15 +214,20 @@ from recon.fingerprint import TechnologyFingerprinter
 async def recon(domain: str):
     enumerator = SubdomainEnumerator(domain, max_workers=50)
     subdomains = await enumerator.enumerate_all()
+
     await LiveHostChecker(timeout=3.0, concurrency=20).check_many(subdomains)
+
     for subdomain in subdomains:
         subdomain.technologies = TechnologyFingerprinter().fingerprint(subdomain)
+
     return subdomains
 
 hosts = asyncio.run(recon("example.com"))
 ```
 
-## Customizing fingerprint rules
+---
+
+## 🧬 Customizing fingerprint rules
 
 Fingerprint rules live in `recon/fingerprint.py`:
 
@@ -228,24 +240,30 @@ Add your own entry, for example:
 BODY_RULES.append((re.compile(r"myapp-version=\d+", re.I), "MyApp"))
 ```
 
-## Performance & reliability notes
+---
+
+## ⚡ Performance & reliability notes
 
 - DNS brute-force scales with `--threads`; HTTP probing with `--http-concurrency`.
 - Every network operation has a bounded timeout; slow or dead services are skipped, never fatal.
-- crt.sh is a free public service and can be slow or rate-limited -- passive requests are retried up to 3 times with exponential backoff, and failures are logged as warnings that never abort the scan.
+- crt.sh is a free public service and can be slow or rate-limited — passive requests are retried up to 3 times with exponential backoff, and failures are logged as warnings that never abort the scan.
 - Body samples are capped at 200 KB per host to keep memory usage flat on large engagements.
 
-## Security & TLS notes
+---
+
+## 🔐 Security & TLS notes
 
 - The live-host checker connects with certificate validation disabled
   (`verify=False`). This is deliberate: internal and staging hosts often use
   self-signed or expired certificates, and the tool only inspects response
-  metadata (status code, title, headers) -- it never transmits credentials.
+  metadata (status code, title, headers) — it never transmits credentials.
   If you need strict validation, set `verify=True` in `recon/live_check.py`.
-- Only run this tool against systems you own or are explicitly authorized
+- 🚫 Only run this tool against systems you own or are explicitly authorized
   to test. Unauthorized scanning is illegal in most jurisdictions and can
   be treated as an attack.
 
-## License
+---
 
-MIT -- use it, learn from it, improve it. See `LICENSE` for details.
+## 📜 License
+
+MIT — use it, learn from it, improve it. See `LICENSE` for details. 🎉
