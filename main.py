@@ -198,16 +198,28 @@ async def run_scan(args: argparse.Namespace, domain: str, wordlist: List[str]) -
             f"Passive crt.sh + active DNS brute-force "
             f"({len(wordlist)} names, {args.threads} threads)"
         )
-        progress, task = console.make_progress(
-            len(wordlist) if not args.active_only else len(wordlist),
-            "DNS brute-force" if not args.active_only else "DNS brute-force (active-only)",
-        )
-        callback = ProgressCallback(progress, task)
-        with progress:
-            if args.active_only:
+        if args.active_only:
+            progress, task = console.make_progress(
+                len(wordlist),
+                "DNS brute-force (active-only)",
+            )
+            callback = ProgressCallback(progress, task)
+            with progress:
                 subdomains = enumerator.brute_force(progress_cb=callback)
-            else:
-                subdomains = await enumerator.enumerate_all(progress_cb=callback)
+        else:
+            progress, (crt_task, brute_task) = console.make_progress_multi(
+                [
+                    (1, "crt.sh certificate transparency query"),
+                    (len(wordlist), "DNS brute-force"),
+                ]
+            )
+            crt_cb = ProgressCallback(progress, crt_task)
+            brute_cb = ProgressCallback(progress, brute_task)
+            with progress:
+                subdomains = await enumerator.enumerate_all(
+                    progress_cb=brute_cb,
+                    passive_progress_cb=crt_cb,
+                )
     console.info(f"Enumeration finished: {len(subdomains)} unique subdomains")
 
     # ---------------------------------------------------------------- phase 2

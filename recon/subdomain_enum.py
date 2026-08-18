@@ -307,6 +307,7 @@ class SubdomainEnumerator:
     async def enumerate_all(
         self,
         progress_cb: Optional[Callable[[int, int], None]] = None,
+        passive_progress_cb: Optional[Callable[[int, int], None]] = None,
         passive_only: bool = False,
         active_only: bool = False,
     ) -> List[Subdomain]:
@@ -315,6 +316,8 @@ class SubdomainEnumerator:
         Args:
             progress_cb: Optional ``(done, total)`` progress callback for
                 the active phase.
+            passive_progress_cb: Optional ``(done, total)`` progress
+                callback invoked once when the passive phase completes.
             passive_only: Skip the active brute-force phase.
             active_only: Skip the passive crt.sh phase.
 
@@ -326,7 +329,13 @@ class SubdomainEnumerator:
         if active_only:
             return self.brute_force(progress_cb=progress_cb)
 
-        passive_task = asyncio.create_task(self.enumerate_passive())
+        async def passive_wrapped() -> List[Subdomain]:
+            result = await self.enumerate_passive()
+            if passive_progress_cb is not None:
+                passive_progress_cb(1, 1)
+            return result
+
+        passive_task = asyncio.create_task(passive_wrapped())
         active_task = asyncio.to_thread(self.brute_force, progress_cb)
         passive_result, active_result = await asyncio.gather(
             passive_task, active_task

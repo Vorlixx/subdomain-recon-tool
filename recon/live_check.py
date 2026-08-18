@@ -168,12 +168,25 @@ class LiveHostChecker:
         """Probe a single scheme; on success, enrich the subdomain object.
 
         Returns:
-            ``True`` when an HTTP response was received.
+            ``True`` when an HTTP response was received. A redirect
+            loop is treated as a live host (``alive = True``) while
+            returning ``False`` so the other scheme is still probed.
         """
         url = f"{scheme}://{subdomain.name}"
         try:
             response = await client.get(url)
-        except httpx.TransportError:
+        except httpx.TooManyRedirects:
+            # The server IS answering, it just never settles on a final
+            # response (redirect loop). Mark the host alive so it is not
+            # wrongly reported dead, and keep trying the other scheme.
+            logger.debug(
+                "%s: redirect loop over %s; marking host alive",
+                subdomain.name,
+                scheme,
+            )
+            subdomain.alive = True
+            return False
+        except httpx.RequestError:
             return False
 
         subdomain.http_status = response.status_code

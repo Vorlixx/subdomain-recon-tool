@@ -50,7 +50,7 @@ HEADER_RULES: Dict[str, List[Tuple[Pattern[str], str]]] = {
         (re.compile(r"caddy", re.I), "Caddy"),
         (re.compile(r"cloudflare", re.I), "Cloudflare"),
         (re.compile(r"cloudfront", re.I), "Amazon CloudFront"),
-        (re.compile(r"gse", re.I), "Google Frontend"),
+        (re.compile(r"\b(?:gse|gws)\b", re.I), "Google Frontend"),
         (re.compile(r"lighttpd", re.I), "Lighttpd"),
         (re.compile(r"envoy", re.I), "Envoy"),
         (re.compile(r"traefik", re.I), "Traefik"),
@@ -258,3 +258,4 @@ class BannerGrabber:
                     self.progress_cb(done, total)
 
         return dict(sorted(banners.items()))
+

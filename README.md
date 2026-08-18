@@ -142,7 +142,7 @@ After a scan the output directory contains:
   "domain": "example.com",
   "scan_started_at": "2026-08-17T12:00:00+00:00",
   "scan_duration_seconds": 12.4,
-  "tool": { "name": "subdomain-recon-tool", "version": "1.0.0" },
+  "tool": { "name": "subdomain-recon-tool", "version": "1.0.1" },
   "stats": {
     "total_subdomains": 3,
     "alive_hosts": 1,

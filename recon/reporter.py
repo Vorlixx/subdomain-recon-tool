@@ -15,7 +15,7 @@ from __future__ import annotations
 import html
 import json
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Tuple
 
 from rich.console import Console
 from rich.panel import Panel
@@ -81,12 +81,26 @@ class ConsolePrinter:
             self.console.print(f"[dim]{message}[/dim]")
 
     def make_progress(self, total: int, description: str):
-        """Create a progress bar and its task id.
+        """Create a single progress bar and its task id.
 
         Returns:
             ``(progress, task_id)`` -- wrap ``progress`` in a ``with``
             block and feed completions via ``progress.update(task_id,
             completed=done)``.
+        """
+        progress, task_ids = self.make_progress_multi([(total, description)])
+        return progress, task_ids[0]
+
+    def make_progress_multi(self, tasks: List[Tuple[int, str]]):
+        """Create one Rich progress instance with several independent bars.
+
+        Args:
+            tasks: ``(total, description)`` pairs, one bar per pair.
+
+        Returns:
+            ``(progress, task_ids)`` -- wrap ``progress`` in a ``with``
+            block and feed completions via ``progress.update(task_id,
+            completed=done)`` using the matching task id.
         """
         progress = Progress(
             SpinnerColumn(),
@@ -96,8 +110,11 @@ class ConsolePrinter:
             TimeRemainingColumn(),
             console=self.console,
         )
-        task_id = progress.add_task(description, total=total)
-        return progress, task_id
+        task_ids = [
+            progress.add_task(description, total=total)
+            for total, description in tasks
+        ]
+        return progress, task_ids
 
     def table(self, subdomains: List[Subdomain]) -> None:
         """Print the results table for all discovered subdomains."""
@@ -172,6 +189,8 @@ _HTML_TEMPLATE = """<!DOCTYPE html>
   .filters { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 14px; }
   .filters input, .filters select { background: var(--card); color: var(--text); border: 1px solid var(--border); border-radius: 6px; padding: 8px 12px; font-size: 14px; }
   .filters input { flex: 1; min-width: 220px; }
+  .result-info { color: var(--muted); font-size: 13px; margin: -6px 0 14px; }
+  .result-info.warn { color: var(--yellow); }
   table { width: 100%; border-collapse: collapse; background: var(--card); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
   th { text-align: left; padding: 10px 12px; background: #1c2128; color: var(--muted); font-size: 12px; text-transform: uppercase; letter-spacing: .5px; position: sticky; top: 0; }
   td { padding: 10px 12px; border-top: 1px solid var(--border); vertical-align: top; }
@@ -213,6 +232,7 @@ _HTML_TEMPLATE = """<!DOCTYPE html>
       <option value="bruteforce">bruteforce</option>
     </select>
   </div>
+  <div id="result-info" class="result-info"></div>
   <table>
     <thead><tr><th>#</th><th>Hostname</th><th>IPs</th><th>HTTP</th><th>Source</th><th>Title</th><th>Technologies</th><th>Ports</th><th>Banner</th></tr></thead>
     <tbody>__ROWS__</tbody>
@@ -223,13 +243,21 @@ _HTML_TEMPLATE = """<!DOCTYPE html>
   var search = document.getElementById('search');
   var status = document.getElementById('status');
   var source = document.getElementById('source');
+  var resultInfo = document.getElementById('result-info');
   function applyFilters() {
     var q = (search.value || '').toLowerCase();
     var s = status.value;
     var src = source.value;
     var rows = document.querySelectorAll('tbody tr');
+    var anyFilter = q !== '' || s !== 'all' || src !== 'all';
     var visible = 0;
+    var hasRows = false;
     rows.forEach(function (row) {
+      if (row.getAttribute('data-alive') === null) {
+        row.style.display = anyFilter ? 'none' : '';
+        return;
+      }
+      hasRows = true;
       var hay = (row.getAttribute('data-search') || '').toLowerCase();
       var alive = row.getAttribute('data-alive') === 'true';
       var show = hay.indexOf(q) !== -1;
@@ -239,10 +267,21 @@ _HTML_TEMPLATE = """<!DOCTYPE html>
       row.style.display = show ? '' : 'none';
       if (show) visible += 1;
     });
+    if (!hasRows) {
+      resultInfo.textContent = '';
+      resultInfo.className = 'result-info';
+    } else if (visible === 0) {
+      resultInfo.textContent = 'No hosts match the current filters.';
+      resultInfo.className = 'result-info warn';
+    } else {
+      resultInfo.textContent = visible + (visible === 1 ? ' result' : ' results') + ' found';
+      resultInfo.className = 'result-info';
+    }
   }
   search.addEventListener('input', applyFilters);
   status.addEventListener('change', applyFilters);
   source.addEventListener('change', applyFilters);
+  applyFilters();
 </script>
 </body>
 </html>
